@@ -128,7 +128,7 @@ As can be observed, the model $g(t)$ is linear in the amplitude parameters $A_n$
 
 $$x_{ij} = f\left(t_i - t_0 - T\left\lfloor \frac j 4 \right \rfloor- \phi(j)\right)$$
 
-as the $ij^{\text{th}}$ regressor. The OSL estimator is then obtained using the `statsmodels.api.OLS` class from the `statsmodels` module. Results are saved internally in the program using the output object by calling the `.fit()` method on this class, and that is what is saved in the pickle file when the flag is set from the command line. See the documentation of the `statsmodels` module for more details.
+as the $ij^{\text{th}}$ regressor. The OLS estimator is then obtained using the `statsmodels.api.OLS` class from the `statsmodels` module. Results are saved internally in the program using the output object by calling the `.fit()` method on this class, and that is what is saved in the pickle file when the flag is set from the command line. See the documentation of the `statsmodels` module for more details.
 
 ### Determining Fit Quality
 
