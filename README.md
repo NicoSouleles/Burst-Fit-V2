@@ -99,7 +99,7 @@ Values for $a_1, c,$ and $\lambda$ are pre-determined and not part of fitting th
 
 With the pulse shape defined, the burst can be constructed as a sum of pulses. The comb of pulses used to fit burst must be a monolithic, having pre-set timing between pulses (i.e. the timing between pulses cannot change as a parameter of the fit). In order to define such a function, the timing between pulses must be written as a function of the pulse number.
 
-![Figure indicating pulse timing configuration: tau 1 is the time between first and second pulses in a group, tau 2 between the first and third, and tau 3 between the first and fourth. ](assets/PulseTimingV3.png)
+<img alt="Figure indicating pulse timing configuration: tau 1 is the time between first and second pulses in a group, tau 2 between the first and third, and tau 3 between the first and fourth." url="assets/PulseTimingV3.png" width=50%>
 
 As pulses recur periodically in groups of four, using notation from Figure 1, the timing can be specified by the following modular function:
 
