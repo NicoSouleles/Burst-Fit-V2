@@ -1,0 +1,7 @@
+
+List of variables for first half : amp, c, d; followed by list of variables for second half: c, d
+0.0024624661213446734
+-4.731081784695426e-10
+0.0005939036224228989
+777216155.6546261
+0.00023635677825028256

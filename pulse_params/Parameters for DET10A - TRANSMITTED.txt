@@ -1,0 +1,3 @@
+Sigma and lambda resp. for a transmitted pulse
+4.731081784695426e-10
+900000000
