@@ -4,12 +4,11 @@ import statsmodels.api as sm
 from statsmodels.graphics.gofplots import qqplot
 
 from data_trace import DataTrace
-from fitter import FitData
 from burst_function import BurstFunction
  
 
 def plot_stats_graphs(results: sm.regression.linear_model.RegressionResults,
-                      fig=None, ax1=None, ax2=None):
+                      fig=None, ax1=None, ax2=None, plot_res_lbf=True):
     """
     Plots a "Residuals vs Fitted" plot, and a normal Q-Q plot of the residuals.
     """
@@ -19,9 +18,11 @@ def plot_stats_graphs(results: sm.regression.linear_model.RegressionResults,
 
     ax1.plot(results.fittedvalues, results.resid, lw=0, marker='.', 
              label='Residuals')
-    line_best_fit = sm.OLS(results.fittedvalues, results.resid).fit()
-    ax1.plot(results.fittedvalues, line_best_fit.fittedvalues, color='red',
-             label="Line of best fit")
+
+    if plot_res_lbf:
+        line_best_fit = sm.OLS(results.fittedvalues, results.resid).fit()
+        ax1.plot(results.fittedvalues, line_best_fit.fittedvalues, color='red',
+                 label="Line of best fit")
     ax1.legend()
 
     ax1.set_xlabel("Fitted Values")
@@ -48,6 +49,15 @@ def plot_stats_graphs(results: sm.regression.linear_model.RegressionResults,
     return fig, ax1, ax2
 
 
+def plot_burst_model_trace(ax, times, fit_ampls, bf, **fit_kwargs):
+
+    n_points = 10_000
+    t_start, t_end = np.min(times), np.max(times)
+    plot_times = np.linspace(t_start, t_end, n_points)
+    func_vals = bf.burst_function(plot_times, fit_ampls)
+    ax.plot(plot_times, func_vals, **fit_kwargs)
+
+
 def plot_fit(data_trc: DataTrace, fit_ampls: np.ndarray, r2_val: float, 
              bf: BurstFunction, data_kwargs: dict = {}, 
              fit_kwargs: dict = {}, fig=None, ax=None) -> None:
@@ -60,12 +70,8 @@ def plot_fit(data_trc: DataTrace, fit_ampls: np.ndarray, r2_val: float,
             color='black', lw=0, marker='.', label='Data Trace', 
             **data_kwargs)
 
-    n_points = 10_000
-    t_start, t_end = np.min(times), np.max(times)
-    plot_times = np.linspace(t_start, t_end, n_points)
-    func_vals = bf.burst_function(plot_times, fit_ampls)
-    ax.plot(plot_times, func_vals, 
-            color='blue', label='Burst Fit', **fit_kwargs)
+    plot_burst_model_trace(ax, times, fit_ampls, bf, 
+                           color='blue', label='Burst Fit', **fit_kwargs)
 
     ax.text(0.01, 0.99, f"$R^2={r2_val:.2f}$", fontsize=12,
             transform=ax.transAxes, ha='left', va='top')
@@ -78,7 +84,7 @@ def plot_fit(data_trc: DataTrace, fit_ampls: np.ndarray, r2_val: float,
     return fig, ax
 
 
-def plot_graphs_together(data_trc, fit, bfunc):
+def plot_graphs_together(data_trc, fit, bfunc, plot_res_lbf=True):
     
     fig = plt.figure(figsize=(10, 6))
     gs = fig.add_gridspec(2, 2)
@@ -87,7 +93,8 @@ def plot_graphs_together(data_trc, fit, bfunc):
     ax1 = fig.add_subplot(gs[1, 0])
     ax2 = fig.add_subplot(gs[1, 1])
 
-    fig, ax1, ax2 = plot_stats_graphs(fit, fig=fig, ax1=ax1, ax2=ax2)
+    fig, ax1, ax2 = plot_stats_graphs(fit, fig=fig, ax1=ax1, ax2=ax2, 
+                                      plot_res_lbf=plot_res_lbf)
     fig, ax = plot_fit(data_trc, fit.params, fit.rsquared, bfunc, 
                            fig=fig, ax=ax)
 

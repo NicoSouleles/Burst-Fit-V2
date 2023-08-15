@@ -1,6 +1,9 @@
 /.venv
 /output
 /TODO.md
-/tests
+/logs
+/tests/test_data
+/tests/test_linregress.py
+/tests/test_main.py
 /src/__pycache__/
 /.vscode
