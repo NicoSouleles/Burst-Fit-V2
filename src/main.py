@@ -218,7 +218,6 @@ def test_filepath_overwrite(filename: str, overwrite: bool):
 
 if __name__ == "__main__":
 
-    # TODO: Fill in description, help text, etc.
     parser = argparse.ArgumentParser(prog="Burst Fit",
                                      description="")
 

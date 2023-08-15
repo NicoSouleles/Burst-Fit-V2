@@ -73,8 +73,6 @@ def plot_fit(data_trc: DataTrace, fit_ampls: np.ndarray, r2_val: float,
     ax.set_xlabel(f"Time ({data_trc.time_units})")
     ax.set_ylabel(f"Voltage ({data_trc.data_units})")
 
-    # TODO: Add title
-
     ax.grid()
     ax.legend()
     return fig, ax
