@@ -100,7 +100,7 @@ def single_fit(args: argparse.Namespace):
 
     if args.pickle:
         out_fpath = os.path.join(args.output_path, "fit-objects.pickle")
-        output_pickler(out_fpath, fit_dict, args.overwrite)
+        output_pickler(out_fpath, fit_dict, args.force)
 
     preamb = f"""\
 Output generated at {datetime.datetime.now()}
@@ -109,7 +109,7 @@ Amplitudes (V)"""
     input_fname = os.path.splitext(os.path.split(args.filepath)[-1])[0]
     out_data_path = os.path.join(args.output_path, 
                                  f"{input_fname}-amplitudes.csv")
-    test_filepath_overwrite(out_data_path, args.overwrite)
+    test_filepath_overwrite(out_data_path, args.force)
     np.savetxt(out_data_path, fit_results.params, header=preamb, delimiter=',')
     logger.info(f"Burst amplitudes saved to '{out_data_path}'")
 
@@ -164,7 +164,7 @@ def batch_fit(args: argparse.Namespace):
 
     if args.pickle:
         out_fpath = os.path.join(args.output_path, "fit-objects-dict.pickle")
-        output_pickler(out_fpath, fits, args.overwrite)
+        output_pickler(out_fpath, fits, args.force)
 
     preamb = f"""\
 Output generated at {datetime.datetime.now()}
@@ -173,7 +173,7 @@ Output generated at {datetime.datetime.now()}
     ampl_arr = np.column_stack(amplitdes)
     out_data_path = os.path.join(args.output_path, "trace-amplitudes.csv")
 
-    test_filepath_overwrite(out_data_path, args.overwrite)
+    test_filepath_overwrite(out_data_path, args.force)
     np.savetxt(out_data_path, ampl_arr, header=preamb, delimiter=',')
     logger.info(f"Burst amplitudes saved to '{out_data_path}'")
 
@@ -214,7 +214,7 @@ if __name__ == "__main__":
                         help="plot fit and statistics graphs")
     parser.add_argument('-v', '--verbose', action='store_true', 
                         help="verbose output")
-    parser.add_argument('-w', '--overwrite', action='store_true', 
+    parser.add_argument('-f', '--force', action='store_true', 
                         help="enable overwritting of output files into the "
                         "same directory")
     parser.add_argument('-o', type=str, default="",
@@ -290,8 +290,8 @@ if __name__ == "__main__":
         os.makedirs(out_path)
     args.output_path = out_path
 
-    if args.overwrite:
-        ans = input("You have passed the `-w` flag, indicating that you want "
+    if args.force:
+        ans = input("You have passed the `-f` flag, indicating that you want "
                     "to overwrite any previously saved data residing in the "
                     "output directory you have chosen. Are you sure that you "
                     "want to do this? [y/n]")

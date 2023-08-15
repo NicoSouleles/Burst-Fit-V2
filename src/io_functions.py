@@ -31,13 +31,13 @@ def output_pickler(pickle_path, obj, force_overwrite):
 
 def test_filepath_overwrite(filename: str, overwrite: bool):
     """
-    Raises an error if filename exists and the 'overwrite' flag is false.
+    Raises an error if filename exists and the 'force' flag is false.
     """
     
     if os.path.exists(filename) and not overwrite:
         raise RuntimeError(f"'{filename}' has already been written to. Please "
                            "choose another output destination, or enable "
-                           "file-overwritting with the -w flag.")
+                           "file-overwritting with the -f flag.")
 
 
 class Loader:

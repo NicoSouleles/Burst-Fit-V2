@@ -26,7 +26,7 @@ Additionally, the python objects associated with the fit, incluting the model us
 
 The output path of the .csv file and, if specified, the pickle file can be set using the `-o` flag, followed by the output path string. Currently there is no option to rename the output files. If you try to run the command using an output directory which has already been output to before, the program will prevent you from overwritting the data that's already there.
 
-If you want to overwrite any data that's already in the output directory that you have choosen, then pass the `-w` flag.
+If you want to overwrite any data that's already in the output directory that you have choosen, then pass the `-f` flag.
 
 ## Goal
 
