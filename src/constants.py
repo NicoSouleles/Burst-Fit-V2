@@ -21,7 +21,7 @@ TAU_3 = DELTA_1 + DELTA_2 + DELTA_3
 
 # Path to file containing pre-determined parameters for pulse shape.
 # TODO: Change this location
-PARAM_PATH_LOC = "/pulse_params/"
+PARAM_PATH_LOC = "pulse_params/"
  
 PARAM_PATH = PARAM_PATH_LOC + "Gaussian parameters for DET10A pulse - Gaussian and Exponential2.txt"
 PUMP_PARAM_PATH = PARAM_PATH_LOC + "Parameters for DET10A - PUMP.txt"

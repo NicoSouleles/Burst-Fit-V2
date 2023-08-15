@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import os
 import pickle
 import datetime
+import sys
 
 from io_functions import LeCroyLoader
 from fitter import Fitter, FitQualityError, FitQualityWarning
@@ -301,4 +302,16 @@ if __name__ == "__main__":
         os.makedirs(out_path)
     args.output_path = out_path
 
-    args.func(args)
+    if args.overwrite:
+        ans = input("You have passed the `-w` flag, indicating that you want "
+                    "to overwrite any previously saved data residing in the "
+                    "output directory you have chosen. Are you sure that you "
+                    "want to do this? [y/n]")
+        match ans:
+            case "y" | "Y":
+                args.func(args)
+            case "n" | "N":
+                print("Fit aborted")
+                sys.exit(0)
+    else:
+        args.func(args)
