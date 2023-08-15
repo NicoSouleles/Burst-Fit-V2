@@ -1,17 +1,20 @@
 import numpy as np
-
 import statsmodels.api as sm
 from scipy.stats import chi2
 
+import logging
 from dataclasses import dataclass
 
 from burst_function import BurstFunction
 from data_trace import DataTrace
 from constants import *
+from logger import add_handlers
 
 
-class FitQualityWarning(Warning):
-    pass
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+add_handlers(logger)
+
 
 class FitQualityError(RuntimeError):
     pass
@@ -28,7 +31,7 @@ class FitData:
 
 class Fitter:
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, thresh: float=0.95) -> None:
         """
         Class containing fitting methods logic. `name` input parameter is for
         the purposes of error traceback, and is what should display for the name
@@ -37,9 +40,37 @@ class Fitter:
         
         self.results = None
         self.name = name
+        
+        try:
+            self.set_rsquared_thresh(thresh)
+        except ValueError as err:
+            logger.error(err, exc_info=True)
+            raise err
+
+    def set_rsquared_thresh(self, thresh: float):
+        """
+        Sets a trheshold for the R^2 value of any fits produced; will cause an
+        error to be raised if a fit is produced with an R^2 below this treshold.
+        """
+        
+        if not isinstance(thresh, float):
+            raise ValueError("Threshold value must be a float")
+
+        if not (0. <= thresh <= 1.):
+            raise ValueError("Threshold value must be between 0 and 1")
+
+        self._fit_qual_thresh = thresh
 
     def linear_regress_burst(self, dtrace: DataTrace, 
                              bfunc: BurstFunction) -> sm.regression.linear_model.RegressionResults:
+        """
+        Performs a linear regression on a data trace with a BurstFunction object
+        as the model. Returns the `statsmodels.api.linear_model.RegressionResults` 
+        objcet produced by the fit.
+
+        Raises a `FitQualityError` if the R^2 value is less that the threshold 
+        parameter in this class.
+        """
         
         time_vals, data_vals = dtrace.get_time_values(), \
                                    dtrace.get_data_values()
@@ -49,6 +80,13 @@ class Fitter:
         sm.add_constant(regressors)
         results = sm.OLS(data_vals, regressors).fit()
         self.results = results
+
+        if results.rsquared < self._fit_qual_thresh:
+            raise FitQualityError(f"{self.name} R^2={results.rsquared:.3f} < "
+                                    f"{self._fit_qual_thresh}. Please evaluate "
+                                    "the quality of fit more thoroughly by "
+                                    "calling the script with verbose output, "
+                                    "or reduce the R^2 threshold value.")
 
         return results
 
@@ -82,24 +120,6 @@ class Fitter:
         r2_val = self.get_r2(data_vals, fvals)
 
         return FitData(fit_ampls, r2_val)
-
-    def evaluate_fit_quality(self, results):
-        """
-        Performs an automated test to evaluate fit quality. This test is
-        rudimentary and will only raise errors in an extreme case. Discression
-        should be used when evaluating the quality of fit, and no substitute
-        can be made for manually looking at the quality of fit statistics and
-        associated plots.
-        """
-        if results.rsquared < 0.95:
-            raise FitQualityWarning(f"{self.name} R^2={results.rsquared:.3f} < "
-                                    "0.95. Please evaluate the quality of fit "
-                                    "more thoroughly by calling the script "
-                                    "with verbose output.")
-        if results.rsquared < 0.5:
-            raise FitQualityError(f"R^2={results.rsquared:.3f} < 0.50. "
-                                  "This fit is very poor and should not be "
-                                  "used.")
 
     @staticmethod
     def get_r2(data_values : np.ndarray, function_values : np.ndarray) -> float:

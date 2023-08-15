@@ -7,15 +7,20 @@ import os
 import pickle
 import datetime
 import sys
+import logging
 
-from io_functions import LeCroyLoader
-from fitter import Fitter, FitQualityError, FitQualityWarning
+from io_functions import LeCroyLoader, output_pickler, test_filepath_overwrite
+from fitter import Fitter, FitQualityError
 from burst_function import BurstFunction
 from plotter import plot_graphs_together
 from constants import *
+from logger import add_handlers
 
 
-# TODO: Actually use a proper logger for logging.
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+add_handlers(logger)
+
 
 class NoT0Val:
     """Sentenal value for when no t0 value is passed from the command line."""
@@ -35,7 +40,16 @@ def fit_trace(filepath: str, t0_value: float, n_pulses: int, ptype: TraceType,
 
     fname = os.path.splitext(os.path.split(filepath)[-1])[0]
     fitter = Fitter(name=fname)
-    fit = fitter.linear_regress_burst(res_data_trc, bfunc)
+
+    fit_error = None
+    try:
+        fit = fitter.linear_regress_burst(res_data_trc, bfunc)
+
+    except FitQualityError as err:
+        # If a fit quality error is raised, display the plot of the
+        # fit before throwing the exception.
+        fit_error = err
+        show_fig = True
 
     # `uval` is taken as the uncertainty estimate for the scope trace values,
     # and it is the maximum voltage value read by the scope before the first
@@ -53,18 +67,6 @@ def fit_trace(filepath: str, t0_value: float, n_pulses: int, ptype: TraceType,
                        headers=["Chi-Squared Stats"], floatfmt='.2e'))
         print("\n")
 
-    fit_error = None
-    try:
-        fitter.evaluate_fit_quality(fit)
-    except FitQualityWarning as err:
-        # If a fit quality error is raised, display the plot of the
-        # fit before throwing the exception.
-        fit_error = err
-        show_fig = True
-    except FitQualityError as err:
-        fit_error = err
-        show_fig = True
-
     if show_fig:
         fig, _, _, _ = plot_graphs_together(data_trc, fit, bfunc)
 
@@ -73,10 +75,12 @@ def fit_trace(filepath: str, t0_value: float, n_pulses: int, ptype: TraceType,
         plt.show()
 
     if not fit_error is None:
+        logger.error(fit_error, exc_info=True)
         raise FitQualityError(fit_error)
 
-    print(f"[Info]: Trace {fname} fit with R^2={fit.rsquared:.2f}.")
+    logger.info("Trace %s fit with R^2=%.2f." % (fname, fit.rsquared))
     return {'fit_results': fit, 'data_trc': data_trc, 'burst_model': bfunc}
+
 
 
 def single_fit(args: argparse.Namespace):
@@ -88,6 +92,7 @@ def single_fit(args: argparse.Namespace):
     command line flags).
     """
     
+    logger.info("Initiating singe fit from '%s'" % args.filepath)
     ttype = getattr(TraceType, args.trace_type)
     fit_dict = fit_trace(args.filepath, args.t0_value, args.n_pulses, ttype, 
                          show_fig=args.plot, verbose_output=args.verbose)
@@ -95,10 +100,7 @@ def single_fit(args: argparse.Namespace):
 
     if args.pickle:
         out_fpath = os.path.join(args.output_path, "fit-objects.pickle")
-        test_filepath_overwrite(out_fpath, args.overwrite)
-        with open(out_fpath, 'wb') as file:
-            pickle.dump(fit_dict, file)
-            print(f"Pickle file saved to '{out_fpath}'")
+        output_pickler(out_fpath, fit_dict, args.overwrite)
 
     preamb = f"""\
 Output generated at {datetime.datetime.now()}
@@ -109,7 +111,7 @@ Amplitudes (V)"""
                                  f"{input_fname}-amplitudes.csv")
     test_filepath_overwrite(out_data_path, args.overwrite)
     np.savetxt(out_data_path, fit_results.params, header=preamb, delimiter=',')
-    print(f"Burst amplitudes saved to '{out_data_path}'")
+    logger.info(f"Burst amplitudes saved to '{out_data_path}'")
 
 
 def batch_fit(args: argparse.Namespace):
@@ -140,7 +142,7 @@ def batch_fit(args: argparse.Namespace):
             raise ValueError("Must either pass t0 values from the manifest "
                              "file, or from the command line.")
 
-    print(f"\n[Info]: Fitting batch from {args.data_path}")
+    logger.info(f"Fitting batch from {args.data_path}")
     
     fits = {}
     amplitdes = []
@@ -162,10 +164,7 @@ def batch_fit(args: argparse.Namespace):
 
     if args.pickle:
         out_fpath = os.path.join(args.output_path, "fit-objects-dict.pickle")
-        test_filepath_overwrite(out_fpath, args.overwrite)
-        with open(out_fpath, 'wb') as file:
-            pickle.dump(fits, file)
-            print(f"[Info]: Pickle file saved to '{out_fpath}'")
+        output_pickler(out_fpath, fits, args.overwrite)
 
     preamb = f"""\
 Output generated at {datetime.datetime.now()}
@@ -176,7 +175,7 @@ Output generated at {datetime.datetime.now()}
 
     test_filepath_overwrite(out_data_path, args.overwrite)
     np.savetxt(out_data_path, ampl_arr, header=preamb, delimiter=',')
-    print(f"[Info]: Burst amplitudes saved to '{out_data_path}'")
+    logger.info(f"Burst amplitudes saved to '{out_data_path}'")
 
 
 def loader(args: argparse.Namespace):
@@ -193,7 +192,7 @@ def loader(args: argparse.Namespace):
             results = results[args.trace]
 
     fit, data_trc, bfunc = results.values()
-    print(f"[Info]: Fit results loaded from {args.filename}")
+    logger.info(f"Fit results loaded from {args.filename}")
     if args.verbose:
         print("\n", fit.summary())
 
@@ -205,16 +204,6 @@ def loader(args: argparse.Namespace):
         fig.tight_layout()
         plt.show()
 
-
-def test_filepath_overwrite(filename: str, overwrite: bool):
-    """
-    Raises an error if filename exists and the 'overwrite' flag is false.
-    """
-    
-    if os.path.exists(filename) and not overwrite:
-        raise RuntimeError(f"'{filename}' has already been written to. Please "
-                           "choose another output destination, or enable "
-                           "file-overwritting with the -w flag.")
 
 if __name__ == "__main__":
 
@@ -308,9 +297,11 @@ if __name__ == "__main__":
                     "want to do this? [y/n]")
         match ans:
             case "y" | "Y":
+                logger.warn("Output overwriting enabled, data in selected " 
+                            "output directory will be overwritten.")
                 args.func(args)
             case "n" | "N":
-                print("Fit aborted")
+                logger.info("Fit aborted")
                 sys.exit(0)
     else:
         args.func(args)
