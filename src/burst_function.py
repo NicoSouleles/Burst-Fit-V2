@@ -41,10 +41,10 @@ class BurstFunction:
         self.pulse_shape.parameters = np.array(params)
 
     @staticmethod
-    def tau_function(n : np.ndarray) -> np.ndarray:
+    def tau_function(n: np.ndarray) -> np.ndarray:
         """
         Returns the timing value for each pulse within a burst of four. See diagram
-        in README for how constants TAU_1, TAU_2 and TAU_3 relate to the overall 
+        in README for how constants TAU_1, TAU_2 and TAU_3 relate to the overall
         timing.
         """
 
@@ -60,12 +60,12 @@ class BurstFunction:
 
     def get_pulse_matrix(self, time_vals) -> np.ndarray:
             """
-            Return a matrix of pulse values, where each column corresponds to a 
-            series of times (axis 0), and each row corresponds to a different 
+            Return a matrix of pulse values, where each column corresponds to a
+            series of times (axis 0), and each row corresponds to a different
             value of n (axis 1).
 
-            This is also a matrix of regressors for the burst function if doing linear 
-            regression.
+            This is also a matrix of regressors for the burst function if doing
+            linear regression.
             """
 
             n_values = np.arange(0, self._n_pulses, 1, dtype=int)

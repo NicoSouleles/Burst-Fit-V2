@@ -14,6 +14,41 @@ logger.setLevel(logging.DEBUG)
 add_handlers(logger)
 
 
+class OutputHandler:
+
+    def __init__(self, filepath, force_overwrites=False):
+        
+        self.fpath = filepath
+        self.fname, self.fileext = os.path.splitext(
+            os.path.split(filepath)[-1]
+        )
+
+        self.force_overwrites = force_overwrites
+        self.preamble = ""
+
+    def set_file_preamble(self, preamble: str):
+        if not isinstance(preamble, str):
+            raise ValueError("Preamble must be of type str")
+        self.preamble = preamble
+
+    def save_csv(self, arr: np.ndarray, col_headers: list[str]=[], 
+                 encoding: str=None):
+        """
+        Wrapper for numpy's savetxt function, to save a numpy array to a .csv
+        file.
+
+        `col_headers` is a list of names for the columns in the array to be 
+        saved. Headers will be saved as comments (i.e. '# ' will be appended
+        to the front of each headername). Must have the same length as the 
+        number of columns in `arr`.
+        """
+        
+
+        np.savetxt(self.fpath, arr, 
+                   delimiter=',', encoding=encoding)
+
+
+
 def output_pickler(pickle_path, obj, force_overwrite):
     """
     Pickles an output data object.
