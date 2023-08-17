@@ -3,15 +3,13 @@
 Nicolas Souleles  
 Summer 2023
 
-## Goal
-
-Reflectometry data input into the program consists of multiple data traces input as time series. These are the "pump", "reflected", and "transmitted" traces, and correspond to a burst of pulses produced by a laser which has struck a target and generated a plasma. "Pump" is a measurement of the original pump burst prdocued by the laser, and the goal is to compare the reflected and transmitted pulse amplitudes against the pump trace, in order to determine what percentage of each pulse was reflected, and what percentage emitted.
-
-In order to do that, data series for each trace are fit to a pre-set pattern of pulses, with variable amplitude. Fit parameters for the amplitude are then compared to obtain the relevant reflectomentry measurements. Fitting the pulses requires a model function wich consists of one burst: a comb of pulses with pre-defined timing intervals between them matching that of the burst from the laser. In order to useful results, (1) the number of pulses under consideration must be known, and (2) pulses between different data traces must be matched i.e. the nth pulse of the pump trace must be compared to the pulse within the reflected and transmitted traces which resulted from that pump pulse; comparing the nth pulse from pump to the mth pulse from the reflection measurement, where m =/= n, leads to a meaningless result.
-
 ## Description
 
-Program that curve-fits bursts of pulses in order to analyze pump-probe reflectometry data.
+Reflectometry data consists of multiple data traces input as time series. These are the "pump", "reflected", and "transmitted" traces, and correspond to a burst of pulses produced by a laser which has struck a target and generated a plasma. "Pump" is a measurement of the original pump burst prdocued by the laser, and the goal is to compare the reflected and transmitted pulse amplitudes against the pump trace, in order to determine what percentage of each pulse was reflected, and what percentage emitted.
+
+In order to do that, data series for each trace are fit to a pre-set pattern of pulses, with variable amplitude. Fit parameters for the amplitude can then be compared to obtain the relevant reflectomentry measurements. Fitting the pulses requires a model function wich consists of one burst: a comb of pulses with pre-defined timing intervals between them matching that of the burst from the laser. In order to useful results, (1) the number of pulses under consideration must be known, and (2) pulses between different data traces must be matched i.e. the nth pulse of the pump trace must be compared to the pulse within the reflected and transmitted traces which resulted from that pump pulse; comparing the nth pulse from pump to the mth pulse from the reflection measurement, where m =/= n, leads to a meaningless result.
+
+This program takes in one or several traces, and fits them to a burst of pulses. The user defines the number of pulses to fit for each trace, and what point in time should be considered the peak of the first pulse, the `t0` value. A list of amplitudes for all the pulses in a fitted burst is then output for each file specified.
 
 ### Input
 
