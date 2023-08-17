@@ -3,6 +3,12 @@
 Nicolas Souleles  
 Summer 2023
 
+## Goal
+
+Reflectometry data input into the program consists of multiple data traces input as time series. These are the "pump", "reflected", and "transmitted" traces, and correspond to a burst of pulses produced by a laser which has struck a target and generated a plasma. "Pump" is a measurement of the original pump burst prdocued by the laser, and the goal is to compare the reflected and transmitted pulse amplitudes against the pump trace, in order to determine what percentage of each pulse was reflected, and what percentage emitted.
+
+In order to do that, data series for each trace are fit to a pre-set pattern of pulses, with variable amplitude. Fit parameters for the amplitude are then compared to obtain the relevant reflectomentry measurements. Fitting the pulses requires a model function wich consists of one burst: a comb of pulses with pre-defined timing intervals between them matching that of the burst from the laser. In order to useful results, (1) the number of pulses under consideration must be known, and (2) pulses between different data traces must be matched i.e. the nth pulse of the pump trace must be compared to the pulse within the reflected and transmitted traces which resulted from that pump pulse; comparing the nth pulse from pump to the mth pulse from the reflection measurement, where m =/= n, leads to a meaningless result.
+
 ## Description
 
 Program that curve-fits bursts of pulses in order to analyze pump-probe reflectometry data.
@@ -31,12 +37,6 @@ Additionally, the python objects associated with the fit, incluting the model us
 The output path of the .csv file and, if specified, the pickle file can be set using the `-o` flag, followed by the output path string. Currently there is no option to rename the output files. If you try to run the command using an output directory which has already been output to before, the program will prevent you from overwritting the data that's already there.
 
 If you want to overwrite any data that's already in the output directory that you have choosen, then pass the `-f` flag.
-
-## Goal
-
-Reflectometry data input into the program consists of multiple data traces input as time series. These are the "pump", "reflected", and "transmitted" traces, and correspond to a burst of pulses produced by a laser which has struck a target and generated a plasma. "Pump" is a measurement of the original pump burst prdocued by the laser, and the goal is to compare the reflected and transmitted pulse amplitudes against the pump trace, in order to determine what percentage of each pulse was reflected, and what percentage emitted.
-
-In order to do that, data series for each trace are fit to a pre-set pattern of pulses, with variable amplitude. Fit parameters for the amplitude are then compared to obtain the relevant reflectomentry measurements. Fitting the pulses requires a model function wich consists of one burst: a comb of pulses with pre-defined timing intervals between them matching that of the burst from the laser. In order to useful results, (1) the number of pulses under consideration must be known, and (2) pulses between different data traces must be matched i.e. the nth pulse of the pump trace must be compared to the pulse within the reflected and transmitted traces which resulted from that pump pulse; comparing the nth pulse from pump to the mth pulse from the reflection measurement, where m =/= n, leads to a meaningless result.
 
 ## Instructions for Running this Program
 
