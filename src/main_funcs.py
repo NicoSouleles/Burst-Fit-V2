@@ -36,6 +36,25 @@ class NoT0Val:
 
 def fit_trace(filepath: str, t0_value: float, n_pulses: int, ptype: TraceType,
               show_fig=False, verbose_output=False):
+    """
+    Performs the operation of loading in data, and fitting it to a burst of
+    pulses.
+
+    Returns a dictionary containig a RegressionResultsWrapper produced by
+    statsmodels, keyed with 'fit_results', a copy of the initial data trace
+    object, keyed with 'data_trc', and a copy of the burst function object
+    used to make the fit, keyed with 'burst_model'.
+    """
+    
+    """
+    (Hey there, if you're reading this, maybe you want to refactor this so that 
+    it outputs a class with a well defined interface that contains these keys
+    as attributes. This should break the rest of the code, since class 
+    attributes are accessible by subscripting with a string for the attribute
+    name, just like a dictionary. Just be careful not to break everything
+    else that relies on this function :). Either way, I'm not going to do it,
+    my term here ends in like 2 days)
+    """
 
     data_trc = LeCroyLoader.load_trace(filepath)
     bfunc = BurstFunction(t0_value, n_pulses, ptype)
@@ -86,6 +105,10 @@ def fit_trace(filepath: str, t0_value: float, n_pulses: int, ptype: TraceType,
 
 
 class CommandHandler(object):
+    """
+    Singleton class responsible for dispatching the correct method to each
+    subcommand in the CLI (see main.py).
+    """
 
     # Make this class a singleton
     def __new__(cls):

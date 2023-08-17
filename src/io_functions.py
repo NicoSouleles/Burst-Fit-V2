@@ -16,6 +16,9 @@ add_handlers(logger)
 
 
 class OutputHandler:
+    """
+    Class to handle file output operations.
+    """
 
     def __init__(self, filepath, force_overwrites=False):
         
@@ -85,7 +88,10 @@ class OutputHandler:
 
 
 class Loader:
-
+    """
+    Abstract class to handle loading functionality for a certain data trace 
+    type. Derive a class from this to implement specific loading behavior.
+    """
     def __init__(self) -> None:
         pass
 
@@ -94,7 +100,11 @@ class Loader:
 
 
 class LeCroyLoader(Loader):
-
+    """
+    Class for loading in data, specifically produced by a LeCroy scope, and 
+    making a `DataTrace` object with it.
+    """
+    
     def __init__(self) -> None:
         super().__init__()
 

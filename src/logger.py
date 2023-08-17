@@ -1,3 +1,8 @@
+"""
+This file manages the logging functionality for the program. This program logs
+both to stdout, and to a rotating log file.
+"""
+
 import logging
 from logging.handlers import RotatingFileHandler
 import configparser

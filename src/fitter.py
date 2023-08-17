@@ -17,26 +17,20 @@ add_handlers(logger)
 
 
 class FitQualityError(RuntimeError):
+    """
+    Should be raised when the fit quality dips below a certain threshold.
+    """
     pass
-
-@dataclass(slots=True)
-class FitData:
-    fit_ampls: np.ndarray
-    r2_val: float
-
-    def from_results(self, res: sm.regression.linear_model.RegressionResults):
-        self.fit_ampls = res.params
-        self. r2_val = res.rsquared
 
 
 class Fitter:
+    """
+    Class containing fitting methods logic. `name` input parameter is for
+    the purposes of error traceback, and is what should display for the name
+    of a problematic fit if an fitting error is raiesd.
+    """
 
     def __init__(self, name: str, thresh: float=0.95) -> None:
-        """
-        Class containing fitting methods logic. `name` input parameter is for
-        the purposes of error traceback, and is what should display for the name
-        of a problematic fit if an fitting error is raiesd.
-        """
         
         self.results = None
         self.name = name
@@ -91,6 +85,11 @@ class Fitter:
         return results
 
     def get_chi2_stats(self, errs: np.ndarray):
+        """
+        Does a chi-squared test on the fit, given uncertainty values for the
+        data.
+        """
+
         if self.results is None:
             raise AttributeError("`self.results` is None. Must perform fit "
                                  "before calculating test statistics.")
@@ -101,31 +100,10 @@ class Fitter:
         p_val = 1 - chi2.cdf(chi2_val, df=self.results.df_resid)
         return red_chi2_val, p_val
 
-    @DeprecationWarning
-    def _linear_regress_burst(self, dtrace: DataTrace, 
-                             bfunc: BurstFunction) -> FitData:
-
-        time_vals, data_vals = dtrace.get_time_values(), \
-                                   dtrace.get_data_values()
-        
-        regressors = bfunc.get_pulse_matrix(time_vals)
-
-        # The ordinary least squares estimator is given by multiplying the matrix
-        # (X^T X)^-1 X^T by the observations vector y. This is just the 
-        # Moore-Penrose pseudo-inverse of X, which is given by `np.linalg.pinv` 
-        fit_ampls = np.linalg.pinv(regressors).dot(data_vals)
-
-        # Compute the R^2 value associated with the fit
-        fvals = bfunc.burst_function(time_vals, fit_ampls)
-        r2_val = self.get_r2(data_vals, fvals)
-
-        return FitData(fit_ampls, r2_val)
-
     @staticmethod
     def get_r2(data_values : np.ndarray, function_values : np.ndarray) -> float:
         """
-        Returns the coefficient of determination, or R^2 value,
-        of a curve fit.
+        Returns the coefficient of determination, or R^2 value, of a curve fit.
         """
         sum_sq_res = np.sum((data_values - function_values)**2)
         sum_sq_tot = np.sum((data_values - np.mean(data_values))**2)
@@ -134,6 +112,9 @@ class Fitter:
 
     def get_adj_r2(self, data_values : np.ndarray, function_values : np.ndarray, 
                    pulse_num : int) -> float:
+        """
+        Returns the adjusted R^2 value of a fit.
+        """
         r2_val = self.get_r2(data_values, function_values)
         return 1 - (1 - r2_val) * (len(data_values) - 1) / (len(data_values) -
                                                             pulse_num + 1)

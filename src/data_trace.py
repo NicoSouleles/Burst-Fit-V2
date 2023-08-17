@@ -2,7 +2,11 @@ import numpy as np
 
 
 class DataTrace:
-
+    """
+    Class representing a time series. Contains two numpy arrays, one list of 
+    time values, and one list of data values. Also contanis auxiliary info
+    like units.
+    """
     def __init__(self, time_values: np.ndarray, data_values: np.ndarray, 
                  time_units: str = "s", data_units: str = "V") -> None:
         

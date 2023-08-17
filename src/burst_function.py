@@ -5,7 +5,10 @@ from pulse_profiles import GaussianExp
 
 
 class BurstFunction:
-
+    """
+    Class defining the parameters of the burst shape function. Includes timing
+    information, and functionality for producing a regression matrix.
+    """
     def __init__(self, t_0: float, n_pulses: int, 
                  pulse_type: TraceType) -> None:
         self._t0 = t_0
@@ -59,30 +62,34 @@ class BurstFunction:
         return PERIOD * np.floor_divide(n_vals, 4) + self.tau_function(n_vals)
 
     def get_pulse_matrix(self, time_vals) -> np.ndarray:
-            """
-            Return a matrix of pulse values, where each column corresponds to a
-            series of times (axis 0), and each row corresponds to a different
-            value of n (axis 1).
+        """
+        Return a matrix of pulse values, where each column corresponds to a
+        series of times (axis 0), and each row corresponds to a different
+        value of n (axis 1).
 
-            This is also a matrix of regressors for the burst function if doing
-            linear regression.
-            """
+        This is also a matrix of regressors for the burst function if doing
+        linear regression.
+        """
 
-            n_values = np.arange(0, self._n_pulses, 1, dtype=int)
+        n_values = np.arange(0, self._n_pulses, 1, dtype=int)
 
-            total_tshift = self._t0 - TRACE_DELAY_IDX[self.ptype]
-            time_values = time_vals[:, None] - total_tshift - \
-                            self.get_time_from_pulses(n_values[None, :])
+        total_tshift = self._t0 - TRACE_DELAY_IDX[self.ptype]
+        time_values = time_vals[:, None] - total_tshift - \
+                        self.get_time_from_pulses(n_values[None, :])
 
-            pulse_shape_func = self.pulse_shape.norm_pulse_shape
-            return pulse_shape_func(time_values, *self.pulse_shape.parameters)
+        pulse_shape_func = self.pulse_shape.norm_pulse_shape
+        return pulse_shape_func(time_values, *self.pulse_shape.parameters)
 
     def burst_function(self, time_values, amplitudes) -> np.ndarray:
+        """
+        Returns the function evaluated on an numpy array of time values.
+        Used for plotting mostly. 
+        """
 
-            if len(amplitudes) != self._n_pulses:
-                raise ValueError("Number of amplitudes must equal number of "
-                                "pulses.")
-            amplitudes = np.array(amplitudes)
+        if len(amplitudes) != self._n_pulses:
+            raise ValueError("Number of amplitudes must equal number of "
+                            "pulses.")
+        amplitudes = np.array(amplitudes)
 
-            pulse_val_matrix = self.get_pulse_matrix(time_values)
-            return pulse_val_matrix.dot(amplitudes)
+        pulse_val_matrix = self.get_pulse_matrix(time_values)
+        return pulse_val_matrix.dot(amplitudes)
