@@ -14,7 +14,50 @@ The input to this program from the command line consists of either
 1. Fitting a single trace by passing a path to the trace file location (relative to the directory the python script is being run from), a time value to start fitting from, the number of pulses to fit, and the type of trace to fit (either `PUMP`, `REFLECTED`, or `TRANSMITTED`).
 2. Fitting a batch of files all togeher. This requires a "manifest file" which is a .csv file containing a list of filenames in the first column, the type of trace in the second column, and (optionally) the time value to start at for each file. A batch fit can then be called from the command line by passing a path to this manifest file, a path to the location the files specified in the manifest should be found in, the number of pulses to fit, and the time value to start at for all files, if not already specified in the manifest file.
 
-For further instructions on how to use the program from the command line, please see the "Usage" subsection below.
+**Manifest File Definition:**
+
+When doing a batch fit, the manifest file provided needs to have a specific form. The first column needs to consist of a list of the filenames of the traces that are to be fit. Each filename is specified relative to the `data_path` argument required by the `batch` command. The second column needs to contain strings specifying the different trace types: `PUMP`, `REFLECTED`, and `TRANSMITTED`; strings in this column must be entirely uppercase. The third optional column specifies the point in time of the peak of the first pulse the program will try to fit, for the file in the same row.
+
+**Batch Fit Example:**
+
+Here is an example of the procedure of running a batch fit commnad. Say there are four traces to fit, "C1trc00000.csv", "C1trc00001.csv", "C3trc00000.csv", and "C3trc00001.csv", stored in a folder "./data/", relative to the path this program is being run from. In order to fit these traces in a batch, first create the manifest file, which should be a .csv looking something like this:
+
+| Column 1       | Column 2     | Column 3 |
+| -------------- | :----------: | -------- |
+| C1trc00000.csv | PUMP         |          |
+| C1trc00001.csv | PUMP         |          |
+| C3trc00000.csv | REFLECTED    |          |
+| C3trc00001.csv | REFLECTED    |          |
+
+Lets store this manifest file in the root directory. Then run the command
+
+```console
+python3 src/main.py [general flags] batch [batch flags] "./" "./data" 60 -t="1e-9"
+```
+
+from the root directory (if using windows, the command may be slightly different). This will fit the first 60 pulses of all four files, with the peak of the first pulse starting at 1e-9s for all files. Flags including options to produce an output pickle file, or to change the output directory, can be supplied in the `[general flags]` field; flags specific to the `batch` subcommand are supplied in the `[batch flags]` field.
+
+Suppose, now, one wanted to chaneg the `t0` time value depending on which file is fit. In this case one could update the maifest file including the `t0` values in the thrid column, for example
+
+| Column 1       | Column 2     | Column 3 |
+| -------------- | :----------: | -------: |
+| C1trc00000.csv | PUMP         | 2e-9     |
+| C1trc00001.csv | PUMP         | 1.5e-9   |
+| C3trc00000.csv | REFLECTED    | 1.7e-9   |
+| C3trc00001.csv | REFLECTED    | 3.1e-9   |
+
+Now when we run the command, we can't pass the `-t` flag, since we want the program to get the `t0` value from the manifest file and not the command prompt. Addtionally, we have to tell the program to actually grab the `t0` values from the manifest file, by passing the  `-m` flag. Now the command looks like
+
+```console
+python3 src/main.py [general flags] batch [batch flags] "./" "./data" 60 -m
+```
+
+If the data one wants to fit is stored across multiple folders, one could either
+
+1. Specify only the common folder in the `data_path` argument, and specify each subfolder in the filenames contained in the manifest file, or
+2. Create a different manifest file for each subfolder, and run two different commands.
+
+For further instructions on how to use the program from the command line, please see the "Usage" subsection below. Also be sure to use the `-h` flag on any command/subcommand for interactive help with that specific command.
 
 ### Output
 

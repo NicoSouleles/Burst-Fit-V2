@@ -5,7 +5,7 @@ import os
 
 
 conf = configparser.ConfigParser()
-conf.read("log.conf")
+conf.read("conf.conf")
 
 stream_h = logging.StreamHandler()
 
