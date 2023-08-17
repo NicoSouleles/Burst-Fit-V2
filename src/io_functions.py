@@ -3,10 +3,11 @@ import numpy as np
 import os
 import pickle
 import logging
+import datetime
 
 from data_trace import DataTrace
 from constants import *
-from logger import add_handlers
+from logger import add_handlers, stream_h
 
 
 logger = logging.getLogger(__name__)
@@ -24,14 +25,24 @@ class OutputHandler:
         )
 
         self.force_overwrites = force_overwrites
-        self.preamble = ""
+        self.preamble = f"Output generated at {datetime.datetime.now()}\n\n"
 
     def set_file_preamble(self, preamble: str):
         if not isinstance(preamble, str):
             raise ValueError("Preamble must be of type str")
         self.preamble = preamble
+    
+    def test_filepath_overwrite(self, filename: str):
+        """
+        Raises an error if filename exists and the 'force' flag is false.
+        """
+        
+        if os.path.exists(filename) and not self.force_overwrites:
+            raise RuntimeError(f"'{filename}' has already been written to. "
+                               "Please choose another output destination, or " 
+                               "enable file-overwritting with the -f flag.")
 
-    def save_csv(self, arr: np.ndarray, col_headers: list[str]=[], 
+    def save_csv(self, arr: np.ndarray, fname: str, col_headers: list[str]=[], 
                  encoding: str=None):
         """
         Wrapper for numpy's savetxt function, to save a numpy array to a .csv
@@ -42,37 +53,35 @@ class OutputHandler:
         to the front of each headername). Must have the same length as the 
         number of columns in `arr`.
         """
+        outfile = os.path.join(self.fpath, fname)
+        self.test_filepath_overwrite(outfile)
         
+        if col_headers is not []:
+            self.preamble += col_headers[0] + "# ".join(col_headers[1:])
 
-        np.savetxt(self.fpath, arr, 
-                   delimiter=',', encoding=encoding)
+        np.savetxt(outfile, arr, header=self.preamble, delimiter=',', 
+                   encoding=encoding)
 
+        stream_h.setLevel(logging.INFO)
+        logger.info(f"Burst amplitudes saved to '{outfile}'")
+        stream_h.setLevel(logging.ERROR)
 
-
-def output_pickler(pickle_path, obj, force_overwrite):
-    """
-    Pickles an output data object.
-    """
-    try:
-        test_filepath_overwrite(pickle_path, force_overwrite)
-    except RuntimeError as err:
-        logger.error(err, exc_info=True)
-        raise err
-    
-    with open(pickle_path, 'wb') as file:
-        pickle.dump(obj, file)
-        logger.info(f"Pickle file saved to '{pickle_path}'")
-
-
-def test_filepath_overwrite(filename: str, overwrite: bool):
-    """
-    Raises an error if filename exists and the 'force' flag is false.
-    """
-    
-    if os.path.exists(filename) and not overwrite:
-        raise RuntimeError(f"'{filename}' has already been written to. Please "
-                           "choose another output destination, or enable "
-                           "file-overwritting with the -f flag.")
+    def pickle_obj(self, filename, obj):
+        """
+        Pickles an output data object.
+        """
+        pickle_path = os.path.join(self.fpath, filename)
+        try:
+            self.test_filepath_overwrite(pickle_path)
+        except RuntimeError as err:
+            logger.error(err, exc_info=True)
+            raise err
+        
+        with open(pickle_path, 'wb') as file:
+            pickle.dump(obj, file)
+            stream_h.setLevel(logging.INFO)
+            logger.info(f"Pickle file saved to '{pickle_path}'")
+            stream_h.setLevel(logging.ERROR)
 
 
 class Loader:
