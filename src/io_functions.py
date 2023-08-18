@@ -60,7 +60,7 @@ class OutputHandler:
         self.test_filepath_overwrite(outfile)
         
         if col_headers is not []:
-            self.preamble += col_headers[0] + "# ".join(col_headers[1:])
+            self.preamble += ", ".join(col_headers)
 
         np.savetxt(outfile, arr, header=self.preamble, delimiter=',', 
                    encoding=encoding)

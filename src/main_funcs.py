@@ -11,7 +11,7 @@ import pickle
 import logging
 
 from io_functions import *
-from fitter import Fitter, FitQualityError
+from fitter import Fitter, FitQualityWarning
 from burst_function import BurstFunction
 from plotting import plot_graphs_together
 from constants import *
@@ -63,15 +63,16 @@ def fit_trace(filepath: str, t0_value: float, n_pulses: int, ptype: TraceType,
     fname = os.path.splitext(os.path.split(filepath)[-1])[0]
     fitter = Fitter(name=fname)
 
-    fit_error = None
     try:
         fit = fitter.linear_regress_burst(res_data_trc, bfunc)
+        fitter.evaluate_fit_quality()
 
-    except FitQualityError as err:
+    except FitQualityWarning as err:
         # If a fit quality error is raised, display the plot of the
         # fit before throwing the exception.
-        fit_error = err
-        show_fig = True
+        show_figures(data_trc, fit, bfunc, fname)
+        logger.error(err, exc_info=True)
+        raise FitQualityWarning(err)
 
     # `uval` is taken as the uncertainty estimate for the scope trace values,
     # and it is the maximum voltage value read by the scope before the first
@@ -90,18 +91,20 @@ def fit_trace(filepath: str, t0_value: float, n_pulses: int, ptype: TraceType,
         print("\n")
 
     if show_fig:
-        fig, _, _, _ = plot_graphs_together(data_trc, fit, bfunc)
-
-        fig.suptitle(fname)
-        fig.tight_layout()
-        plt.show()
-
-    if not fit_error is None:
-        logger.error(fit_error, exc_info=True)
-        raise FitQualityError(fit_error)
-
+        show_figures(data_trc, fit, bfunc, fname)
+    
     logger.info("Trace %s fit with R^2=%.2f." % (fname, fit.rsquared))
     return {'fit_results': fit, 'data_trc': data_trc, 'burst_model': bfunc}
+
+
+def show_figures(data_trc, fit, bfunc, fname):
+
+    fig, _, _, _ = plot_graphs_together(data_trc, fit, bfunc)
+
+    fig.suptitle(fname)
+    fig.tight_layout()
+    plt.show()
+
 
 
 class CommandHandler(object):
@@ -231,7 +234,6 @@ class CommandHandler(object):
         with open(args.filename, 'rb') as file:
             results = pickle.load(file)
         
-        print(results)
         if args.trace:
             results = results[args.trace]
 

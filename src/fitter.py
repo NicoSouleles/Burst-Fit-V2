@@ -3,7 +3,7 @@ import statsmodels.api as sm
 from scipy.stats import chi2
 
 import logging
-from dataclasses import dataclass
+import warnings
 
 from burst_function import BurstFunction
 from data_trace import DataTrace
@@ -16,7 +16,7 @@ logger.setLevel(logging.DEBUG)
 add_handlers(logger)
 
 
-class FitQualityError(RuntimeError):
+class FitQualityWarning(RuntimeWarning):
     """
     Should be raised when the fit quality dips below a certain threshold.
     """
@@ -75,14 +75,15 @@ class Fitter:
         results = sm.OLS(data_vals, regressors).fit()
         self.results = results
 
-        if results.rsquared < self._fit_qual_thresh:
-            raise FitQualityError(f"{self.name} R^2={results.rsquared:.3f} < "
+        return results
+
+    def evaluate_fit_quality(self):
+        if self.results.rsquared < self._fit_qual_thresh:
+            raise FitQualityWarning(f"{self.name} R^2={self.results.rsquared:.3f} < "
                                     f"{self._fit_qual_thresh}. Please evaluate "
                                     "the quality of fit more thoroughly by "
                                     "calling the script with verbose output, "
                                     "or reduce the R^2 threshold value.")
-
-        return results
 
     def get_chi2_stats(self, errs: np.ndarray):
         """
