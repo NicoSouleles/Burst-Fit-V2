@@ -1,7 +1,6 @@
-# Reflectometry Busrt Curve Fit Program
+# A Simple Method for More Precise Pulse-Height Fitting in Sparsely Sampled Data Using Pulse-Shape-Archetype Information, Especially Suited to Ultra-Short-Laser Pulsetrains.
 
-Nicolas Souleles  
-Summer 2023
+Usage of the repository for the reproducibility of the paper (https://arxiv.org/abs/2504.08101).
 
 ## Description
 
@@ -194,3 +193,4 @@ Additionally, plots are produced to indicate the fit quality. When plots are ena
 3. A normal q-q plot, to evaluate the spread of residuals compared to a normal distribution.
 
 These plots can be generated any time a previously generated pickle file is loaded into the program, by passing the `-p` flag with the `load_pickle` command.
+
