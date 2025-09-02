@@ -4,9 +4,14 @@ Usage of the repository for the reproducibility of the paper (https://arxiv.org/
 
 ## Description
 
-Reflectometry data consists of multiple data traces input as time series. These are the "pump", "reflected", and "transmitted" traces, and correspond to a burst of pulses produced by a laser which has struck a target and generated a plasma. "Pump" is a measurement of the original pump burst prdocued by the laser, and the goal is to compare the reflected and transmitted pulse amplitudes against the pump trace, in order to determine what percentage of each pulse was reflected, and what percentage emitted.
+This repository provides a set of sample Reflectometry data (see the Sample Reflectometry Data folder) measured in our laboratory, along with our Archetype pulse fitting code for testing and analysis. The data consists of three types of traces: “pump”, “reflected”, and “transmitted”, each recorded as time series using a digital oscilloscope (Teledyne LeCroy WaveSurfer 3054z) combined with photodiodes.
 
-In order to do that, data series for each trace are fit to a pre-set pattern of pulses, with variable amplitude. Fit parameters for the amplitude can then be compared to obtain the relevant reflectomentry measurements. Fitting the pulses requires a model function wich consists of one burst: a comb of pulses with pre-defined timing intervals between them matching that of the burst from the laser. In order to useful results, (1) the number of pulses under consideration must be known, and (2) pulses between different data traces must be matched i.e. the nth pulse of the pump trace must be compared to the pulse within the reflected and transmitted traces which resulted from that pump pulse; comparing the nth pulse from pump to the mth pulse from the reflection measurement, where m =/= n, leads to a meaningless result.
+Pump trace: obtained from the incident laser burst split by a sampler, passed through an integrating sphere, and measured with a Thorlabs DET10A photodiode.
+Reflected trace: the specularly reflected laser signal, coupled into a 2 m multimode fiber and detected by another DET10A.
+Transmitted trace: the transmitted laser signal collected through an aluminum cone and measured with a Thorlabs DET210 photodiode.
+For each of these setups, we have already determined the corresponding Archetype pulse parameters, which can be directly used for fitting.
+
+Fitting the pulses requires a model function wich consists of one burst: a comb of pulses with pre-defined timing intervals between them matching that of the burst from the laser. In order to useful results, (1) the number of pulses under consideration must be known, and (2) pulses between different data traces must be matched i.e. the nth pulse of the pump trace must be compared to the pulse within the reflected and transmitted traces which resulted from that pump pulse; comparing the nth pulse from pump to the mth pulse from the reflection measurement, where m =/= n, leads to a meaningless result.
 
 This program takes in one or several traces, and fits them to a burst of pulses. The user defines the number of pulses to fit for each trace, and what point in time should be considered the peak of the first pulse, the `t0` value. A list of amplitudes for all the pulses in a fitted burst is then output for each file specified.
 
@@ -193,4 +198,5 @@ Additionally, plots are produced to indicate the fit quality. When plots are ena
 3. A normal q-q plot, to evaluate the spread of residuals compared to a normal distribution.
 
 These plots can be generated any time a previously generated pickle file is loaded into the program, by passing the `-p` flag with the `load_pickle` command.
+
 
