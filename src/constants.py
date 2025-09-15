@@ -25,7 +25,7 @@ PARAM_PATH_LOC = "pulse_params/"
 PARAM_PATH = PARAM_PATH_LOC + "Gaussian parameters for DET10A pulse - Gaussian and Exponential2.txt"
 PUMP_PARAM_PATH = PARAM_PATH_LOC + "Parameters for DET10A - PUMP.txt"
 REFLECTED_PARAM_PATH = PARAM_PATH_LOC + "Parameters for DET10A - REFLECTED.txt"
-TRANSMIT_PARAM_PATH = PARAM_PATH_LOC + "Parameters for DET10A - TRANSMITTED.txt"
+TRANSMIT_PARAM_PATH = PARAM_PATH_LOC + "Parameters for DET210 - TRANSMITTED.txt"
 
 # From my code: lambda = 501_474_709.030_812_3
 
